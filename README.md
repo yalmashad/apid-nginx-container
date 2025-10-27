@@ -1,4 +1,4 @@
-# API Discovery & Telemetry Side-Car (NGINX + NJS + Fluent Bit + Docker)
+# API Discovery (NGINX + NJS + Fluent Bit + Docker)
 
 - **NGINX + NJS** — captures sampled API transactions and emits structured JSON logs to `stdout`.
 - **Fluent Bit** — tails NGINX container logs, filters telemetry payloads, and forwards them to a mock telemetry collector (*Obelix*).
