@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "18082:18082"
+      - "18080:18080"
+      - "8000:8000"
+    depends_on:
+      - obelix
+    networks:
+      - tele-net
+    # Logs are now streamed to stdout/stderr (Fluent Bit will pick them up)
+    environment:
+      - NGINX_ENTRYPOINT_QUIET_LOGS=1
+    restart: unless-stopped
+
+  obelix:
+    build: ./obelix
+    ports:
+      - "18093:18093"
+    networks:
+      - tele-net
+    restart: unless-stopped
+
+  fluentbit:
+    image: fluent/fluent-bit:2.2
+    container_name: fluentbit
+    depends_on:
+      - nginx
+    networks:
+      - tele-net
+    volumes:
+      # Mount Fluent Bit configuration
+      - ./fluentbit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./fluentbit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      # Give Fluent Bit access to container logs
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro,rslave
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - FLB_LOG_LEVEL=info
+    restart: unless-stopped
+
+networks:
+  tele-net:
+    driver: bridge
+
